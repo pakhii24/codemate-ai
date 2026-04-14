@@ -1,10 +1,6 @@
-# backend/app/routes/embed.py
-
-from fastapi import APIRouter
-from app.models.schemas import EmbedRequest
+from fastapi import APIRouter, UploadFile, File
 from app.services.embedding import get_embedding
 from app.db.qdrant import client, COLLECTION_NAME
-
 from qdrant_client.models import VectorParams, Distance, PointStruct
 import uuid
 
@@ -19,18 +15,31 @@ except Exception:
     pass
 
 @router.post("/embed")
-def embed_text(request: EmbedRequest):
-    vector = get_embedding(request.text)
-
+def embed_text(request: dict):
+    text = request.get("text", "")
+    vector = get_embedding(text)
     point = PointStruct(
         id=str(uuid.uuid4()),
         vector=vector,
-        payload={"text": request.text}
+        payload={"text": text}
     )
-
-    client.upsert(
-        collection_name=COLLECTION_NAME,
-        points=[point]
-    )
-
+    client.upsert(collection_name=COLLECTION_NAME, points=[point])
     return {"message": "Text embedded successfully"}
+
+@router.post("/upload")
+async def upload_file(file: UploadFile = File(...)):
+    content = await file.read()
+    text = content.decode("utf-8", errors="ignore")
+    chunk_size = 500
+    chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
+    chunks = [c.strip() for c in chunks if len(c.strip()) > 50]
+    points = []
+    for chunk in chunks:
+        vector = get_embedding(chunk)
+        points.append(PointStruct(
+            id=str(uuid.uuid4()),
+            vector=vector,
+            payload={"text": chunk, "source": file.filename}
+        ))
+    client.upsert(collection_name=COLLECTION_NAME, points=points)
+    return {"message": f"Indexed {len(points)} chunks from {file.filename}"}
