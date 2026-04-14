@@ -1,7 +1,9 @@
-from fastembed import TextEmbedding
+# backend/app/services/embedding.py
 
-model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+from sentence_transformers import SentenceTransformer
+
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 def get_embedding(text: str):
-    embeddings = list(model.embed([text]))
-    return embeddings[0].tolist()
+    embedding = model.encode(text)
+    return embedding.tolist()
