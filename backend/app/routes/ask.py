@@ -1,4 +1,3 @@
-```python
 # backend/app/routes/ask.py
 
 from fastapi import APIRouter
@@ -50,4 +49,3 @@ def get_history():
         })
 
     return history
-```

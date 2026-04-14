@@ -1,4 +1,4 @@
-```python
+
 from app.services.embedding import get_embedding
 from app.db.qdrant import client, COLLECTION_NAME
 
@@ -13,5 +13,3 @@ def retrieve_similar(text: str, limit: int = 3):
         return [point.payload['text'] for point in results.points]
     except Exception:
         return []
-
-```
