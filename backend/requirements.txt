@@ -7,4 +7,4 @@ sqlalchemy
 psycopg2-binary
 groq
 python-multipart
-sentence-transformers
+fastembed
