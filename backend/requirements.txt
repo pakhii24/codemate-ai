@@ -6,5 +6,5 @@ pydantic
 sqlalchemy
 psycopg2-binary
 groq
-fastembed
 python-multipart
+sentence-transformers
